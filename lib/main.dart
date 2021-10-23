@@ -77,9 +77,17 @@ class _MyHomePageState extends State<MyHomePage> {
         final passed = await _cache.getString('timeout_string') == null;
         _addTestResult(currentTest, passed);
       });
+      // ---
+      currentTest = 'setBytes';
+      await _cache.setBytes('bytes', [222, 173, 190, 239]);
+      _addTestResult(currentTest, true);
+      // ---
+      currentTest = 'getBytes';
+      final bytes = await _cache.getBytes('bytes');
+      _addTestResult(currentTest, bytes?[0] == 222);
     } catch (err) {
       print(err);
-      _addTestResult(currentTest, false);
+      _addTestResult(currentTest, false, err: err.toString());
     }
   }
 
@@ -89,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _addTestResult(String caption, bool pass) {
+  void _addTestResult(String caption, bool pass, {String err = ''}) {
     setState(() {
       _results.add(Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
@@ -108,6 +116,18 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ));
+      if (err.isNotEmpty) {
+        _results.add(
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.background,
+              borderRadius: BorderRadius.all(Radius.circular(5)),
+            ),
+            child: Text(err),
+          ),
+        );
+      }
     });
   }
 
