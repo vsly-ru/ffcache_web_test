@@ -32,22 +32,34 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _cache = FFCache();
+  final _cache = FFCache(debug: true);
   List<Widget> _results = [];
 
   void _runTests() async {
-    var currentTest = '-';
+    _clearResults();
+    var currentTest = 'init()';
     try {
+      await _cache.init();
+      _addTestResult(currentTest, true);
+      // ---
       currentTest = 'setString';
       const testString = 'test_string';
       await _cache.setString('string', testString);
       _addTestResult(currentTest, true);
+      // ---
+      currentTest = 'getString';
+      final stringTestPassed = await _cache.getString('string') == testString;
+      _addTestResult(currentTest, stringTestPassed);
       // ---
       currentTest = 'setJSON';
       final testJson = jsonDecode(
           '{"id":1,"data":"string data","nested":{"id":"hello","flutter":"rocks"}}');
       await _cache.setJSON('json', testJson);
       _addTestResult(currentTest, true);
+      // ---
+      currentTest = 'getJSON';
+      final jsonTestPassed = (await _cache.getJSON('json'))['id'] == 1;
+      _addTestResult(currentTest, jsonTestPassed);
       // ---
       currentTest = 'setStringWithTimeout & read back';
       const timeout = 512;
@@ -69,6 +81,12 @@ class _MyHomePageState extends State<MyHomePage> {
       print(err);
       _addTestResult(currentTest, false);
     }
+  }
+
+  void _clearResults() {
+    setState(() {
+      _results.clear();
+    });
   }
 
   void _addTestResult(String caption, bool pass) {
